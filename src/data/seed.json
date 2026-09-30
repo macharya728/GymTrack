@@ -1,0 +1,375 @@
+{
+  "exercises": [
+    {
+      "id": "chest_press",
+      "name": "Machine Chest Press",
+      "category": "strength",
+      "equipment": "Pin-Select Machine",
+      "target_muscle": "Chest, Front Delts, Triceps",
+      "cues": "Seat height aligned with mid-chest; wrists straight; elbows at 45 degrees; exhale on press.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": true
+    },
+    {
+      "id": "lat_pulldown",
+      "name": "Seated Lat Pulldown",
+      "category": "strength",
+      "equipment": "Cable Station",
+      "target_muscle": "Lats, Upper Back, Biceps",
+      "cues": "Wide grip; slight 10-degree torso lean; pull bar down to clavicle; squeeze shoulder blades down.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": true
+    },
+    {
+      "id": "cable_row",
+      "name": "Seated Cable Row",
+      "category": "strength",
+      "equipment": "Low Pulley Cable",
+      "target_muscle": "Mid-Back, Rhomboids, Lats",
+      "cues": "Neutral grip handle; chest tall; pull toward lower ribs; don't round lower back.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": false
+    },
+    {
+      "id": "cable_woodchopper",
+      "name": "Cable Torso Rotation",
+      "category": "strength",
+      "equipment": "Cable Column",
+      "target_muscle": "Obliques, Transverse Abdominis",
+      "cues": "Chest-height cable; pivot back foot; rotate torso using core power (punching rotation mechanic).",
+      "default_sets": 3,
+      "default_reps": 12,
+      "is_core_express": false
+    },
+    {
+      "id": "hip_flexor_stretch",
+      "name": "Kneeling Hip Flexor & Psoas Lunge",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Psoas, Hip Flexors, Quads",
+      "cues": "Back knee on mat; tuck pelvis under; push hips gently forward; reach same-side arm overhead.",
+      "duration_seconds": 40,
+      "is_core_express": false
+    },
+    {
+      "id": "wall_shoulder_stretch",
+      "name": "Wall Shoulder & Lat Extension",
+      "category": "stretch",
+      "equipment": "Wall / Mat",
+      "target_muscle": "Shoulders, Lats, Thoracic Spine",
+      "cues": "Hands flat on wall at shoulder height; hinge back and sink chest downward; breathe deeply.",
+      "duration_seconds": 40,
+      "is_core_express": false
+    },
+    {
+      "id": "swim_warmup",
+      "name": "Swim Warm-Up",
+      "category": "swim",
+      "equipment": "Indoor 25m Pool",
+      "target_muscle": "Cardio & Full Body",
+      "cues": "100m easy freestyle or breaststroke. Focus on relaxed breathing and long gliding strokes.",
+      "target_distance_m": 100,
+      "is_core_express": true
+    },
+    {
+      "id": "swim_freestyle_stamina",
+      "name": "Freestyle Stamina Sets",
+      "category": "swim",
+      "equipment": "Indoor 25m Pool",
+      "target_muscle": "Cardio, Shoulder Endurance, Core",
+      "cues": "4 x 50m steady aerobic pace (RPE 6/10). Rest 30 seconds after each 50m.",
+      "target_distance_m": 200,
+      "is_core_express": true
+    },
+    {
+      "id": "swim_kickboard_drills",
+      "name": "Kickboard Drills (Karate Kick Prep)",
+      "category": "swim",
+      "equipment": "Indoor 25m Pool & Kickboard",
+      "target_muscle": "Hip Flexors, Quads, Adductors",
+      "cues": "4 x 25m kickboard flutter kick or breaststroke whip kick. Keep hips high near the water surface.",
+      "target_distance_m": 100,
+      "is_core_express": false
+    },
+    {
+      "id": "swim_cooldown",
+      "name": "Swim Cool-Down",
+      "category": "swim",
+      "equipment": "Indoor 25m Pool",
+      "target_muscle": "Full Body Active Recovery",
+      "cues": "100m slow backstroke or relaxed breaststroke to lower heart rate.",
+      "target_distance_m": 100,
+      "is_core_express": false
+    },
+    {
+      "id": "sauna_session",
+      "name": "Dry Heat Sauna",
+      "category": "recovery",
+      "equipment": "Sauna Room",
+      "target_muscle": "Vascular Elasticity, Tendon Relaxation",
+      "cues": "10–12 minutes. Sit on a clean towel. Step out if dizzy. Take a cool shower immediately after.",
+      "duration_seconds": 660,
+      "is_core_express": true
+    },
+    {
+      "id": "butterfly_stretch",
+      "name": "Seated Butterfly Stretch",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Groin, Inner Thighs (Adductors)",
+      "cues": "Soles together, heels close to pelvis; spine straight; gently press knees toward mat.",
+      "duration_seconds": 45,
+      "is_core_express": true
+    },
+    {
+      "id": "frog_stretch",
+      "name": "Frog Stretch",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Deep Adductors, Pelvic Floor",
+      "cues": "On hands and knees, widen knees as far apart as comfortable, feet turned out; gently rock hips back.",
+      "duration_seconds": 45,
+      "is_core_express": true
+    },
+    {
+      "id": "straddle_stretch",
+      "name": "Seated Straddle Stretch",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Hamstrings, Inner Thighs",
+      "cues": "Wide V-legs; walk fingertips forward from hips keeping back flat. Restores roundhouse/side kick range.",
+      "duration_seconds": 45,
+      "is_core_express": false
+    },
+    {
+      "id": "pigeon_pose",
+      "name": "Pigeon Stretch",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Glutes, Piriformis, Outer Hips",
+      "cues": "Front shin across mat, back leg straight; square hips forward; lower torso onto forearms.",
+      "duration_seconds": 45,
+      "is_core_express": false
+    },
+    {
+      "id": "thoracic_twist",
+      "name": "Thoracic Thread-the-Needle",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Spinal Rotators, Upper Back",
+      "cues": "Hands and knees; thread right arm under torso until shoulder rests on mat; exhale and twist.",
+      "duration_seconds": 40,
+      "is_core_express": false
+    },
+    {
+      "id": "steam_room_session",
+      "name": "Wet Steam Bath & Hydrotherapy",
+      "category": "recovery",
+      "equipment": "Steam Room / Spa Pool",
+      "target_muscle": "Fascial Release, Respiratory Relief",
+      "cues": "8–10 minutes in steam room followed by warm spa jet tub. Perform slow neck and wrist rolls.",
+      "duration_seconds": 540,
+      "is_core_express": true
+    },
+    {
+      "id": "leg_press",
+      "name": "Seated Leg Press Machine",
+      "category": "strength",
+      "equipment": "Pin-Select Leg Press",
+      "target_muscle": "Quadriceps, Glutes",
+      "cues": "Feet shoulder-width in middle of footplate; push through heels and mid-foot; never lock knees at the top.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": true
+    },
+    {
+      "id": "hamstring_curl",
+      "name": "Seated Hamstring Leg Curl",
+      "category": "strength",
+      "equipment": "Pin-Select Machine",
+      "target_muscle": "Hamstrings",
+      "cues": "Adjust roller pad right above Achilles; pull heels beneath seat; control the return slowly.",
+      "default_sets": 3,
+      "default_reps": 12,
+      "is_core_express": true
+    },
+    {
+      "id": "leg_extension",
+      "name": "Seated Leg Extension Machine",
+      "category": "strength",
+      "equipment": "Pin-Select Machine",
+      "target_muscle": "Quadriceps (Knee extension power)",
+      "cues": "Back flat against pad; extend legs fully; squeeze quads for 1 second at top; slow negative.",
+      "default_sets": 3,
+      "default_reps": 12,
+      "is_core_express": false
+    },
+    {
+      "id": "captains_chair_knee_raise",
+      "name": "Captain's Chair Knee Raise",
+      "category": "strength",
+      "equipment": "Tower / Captain's Chair",
+      "target_muscle": "Lower Abdominals, Hip Flexors",
+      "cues": "Forearms braced on pads; pull knees up to chest without swinging; control descent.",
+      "default_sets": 3,
+      "default_reps": 12,
+      "is_core_express": false
+    },
+    {
+      "id": "hamstring_pike_stretch",
+      "name": "Hamstring Pike Stretch",
+      "category": "stretch",
+      "equipment": "Mat",
+      "target_muscle": "Hamstrings, Calves",
+      "cues": "Sit with legs straight; reach hands toward ankles or toes keeping chest open; avoid severe hunching.",
+      "duration_seconds": 45,
+      "is_core_express": false
+    },
+    {
+      "id": "swim_intervals",
+      "name": "Sprint & Recovery Intervals",
+      "category": "swim",
+      "equipment": "Indoor 25m Pool",
+      "target_muscle": "Cardio, VO2 Max, Explosive Stamina",
+      "cues": "4 x 25m fast sprint (rest 45s between laps), followed by 2 x 100m smooth aerobic pace.",
+      "target_distance_m": 300,
+      "is_core_express": true
+    },
+    {
+      "id": "goblet_squat",
+      "name": "Light Dumbbell Goblet Squat",
+      "category": "strength",
+      "equipment": "Light Dumbbell (8-12kg)",
+      "target_muscle": "Quads, Glutes, Core Bracing",
+      "cues": "Hold dumbbell vertically at chest; elbows inside knees at bottom; feet slightly turned out.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": true
+    },
+    {
+      "id": "machine_shoulder_press",
+      "name": "Seated Machine Overhead Press",
+      "category": "strength",
+      "equipment": "Pin-Select Machine",
+      "target_muscle": "Anterior/Lateral Deltoids, Triceps",
+      "cues": "Seat adjusted so handles align with chin; press up without arching lower back; slow descent.",
+      "default_sets": 3,
+      "default_reps": 10,
+      "is_core_express": true
+    },
+    {
+      "id": "machine_pec_fly",
+      "name": "Machine Pec Fly / Rear Delt",
+      "category": "strength",
+      "equipment": "Pin-Select Machine",
+      "target_muscle": "Pectorals, Scapular Stabilizers",
+      "cues": "Slight elbow bend; squeeze arms together in front of chest; hold peak contraction for 1 second.",
+      "default_sets": 3,
+      "default_reps": 12,
+      "is_core_express": false
+    },
+    {
+      "id": "plank",
+      "name": "Forearm Plank",
+      "category": "strength",
+      "equipment": "Mat",
+      "target_muscle": "Core, Transverse Abdominis, Glutes",
+      "cues": "Elbows under shoulders; tuck tailbone; squeeze glutes and brace stomach like expecting a kick.",
+      "default_sets": 3,
+      "default_reps": 1,
+      "duration_seconds": 45,
+      "is_core_express": false
+    }
+  ],
+  "routines": [
+    {
+      "id": "workout_a",
+      "day_name": "Workout 1",
+      "title": "Upper Body Strength & Mobility",
+      "subtitle": "Machine pressing, pulling, and karate rotational mechanics",
+      "exercises": [
+        "chest_press",
+        "lat_pulldown",
+        "cable_row",
+        "cable_woodchopper",
+        "hip_flexor_stretch",
+        "wall_shoulder_stretch"
+      ],
+      "express_exercise_ids": ["chest_press", "lat_pulldown"]
+    },
+    {
+      "id": "workout_b",
+      "day_name": "Workout 2",
+      "title": "Swim Endurance & Sauna",
+      "subtitle": "Shoulder-friendly cardio, kicking endurance, and dry heat recovery",
+      "exercises": [
+        "swim_warmup",
+        "swim_freestyle_stamina",
+        "swim_kickboard_drills",
+        "swim_cooldown",
+        "sauna_session"
+      ],
+      "express_exercise_ids": ["swim_warmup", "swim_freestyle_stamina", "sauna_session"]
+    },
+    {
+      "id": "workout_c",
+      "day_name": "Workout 3",
+      "title": "Deep Mobility & Steam Recovery",
+      "subtitle": "Pelvic opening, inner thigh adductor stretches, and wet steam bath",
+      "exercises": [
+        "butterfly_stretch",
+        "frog_stretch",
+        "straddle_stretch",
+        "pigeon_pose",
+        "thoracic_twist",
+        "steam_room_session"
+      ],
+      "express_exercise_ids": ["butterfly_stretch", "frog_stretch", "steam_room_session"]
+    },
+    {
+      "id": "workout_d",
+      "day_name": "Workout 4",
+      "title": "Lower Body Strength & Hips",
+      "subtitle": "Quad/hamstring balance, kick chambering strength, and hamstring openers",
+      "exercises": [
+        "leg_press",
+        "hamstring_curl",
+        "leg_extension",
+        "captains_chair_knee_raise",
+        "hamstring_pike_stretch"
+      ],
+      "express_exercise_ids": ["leg_press", "hamstring_curl"]
+    },
+    {
+      "id": "workout_e",
+      "day_name": "Workout 5",
+      "title": "Swim Intervals & Sauna",
+      "subtitle": "Sprint lap intervals for lung stamina and post-swim heat recovery",
+      "exercises": [
+        "swim_warmup",
+        "swim_intervals",
+        "swim_kickboard_drills",
+        "swim_cooldown",
+        "sauna_session"
+      ],
+      "express_exercise_ids": ["swim_warmup", "swim_intervals", "sauna_session"]
+    },
+    {
+      "id": "workout_f",
+      "day_name": "Workout 6",
+      "title": "Full Body Compound & Flow",
+      "subtitle": "Light dumbbell compound movements, core bracing, and steam relaxation",
+      "exercises": [
+        "goblet_squat",
+        "machine_shoulder_press",
+        "machine_pec_fly",
+        "plank",
+        "steam_room_session"
+      ],
+      "express_exercise_ids": ["goblet_squat", "machine_shoulder_press"]
+    }
+  ]
+}
