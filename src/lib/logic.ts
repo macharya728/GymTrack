@@ -197,7 +197,9 @@ export function sanitize(s: AppState): AppState {
   const cleanEx = (x: unknown): ExerciseLog | null => {
     if (!obj(x) || !str(x.exercise_id) || !exIds.has(x.exercise_id)) return null;
     const sets = Array.isArray(x.sets) ? x.sets.map(cleanSet).filter((v): v is SetLog => !!v) : [];
-    return { exercise_id: x.exercise_id, completed: x.completed === true, skipped: x.skipped === true, sets };
+    const out: ExerciseLog = { exercise_id: x.exercise_id, completed: x.completed === true, skipped: x.skipped === true, sets };
+    if (str(x.replaced_from) && exIds.has(x.replaced_from)) out.replaced_from = x.replaced_from;
+    return out;
   };
   const cleanCountdown = (x: unknown): Countdown | null => {
     if (!obj(x)) return null;

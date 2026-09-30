@@ -42,6 +42,8 @@ export interface ExerciseLog {
   exercise_id: string;
   completed: boolean;
   skipped?: boolean;
+  /** Set when swapped in through "Equipment busy": the exercise it replaced */
+  replaced_from?: string;
   sets: SetLog[];
 }
 

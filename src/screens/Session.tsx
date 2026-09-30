@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, BookOpen, Check, ChevronDown, Droplet, History as HistoryIcon, Info, Minus, Pause, Play, Plus, RotateCcw, SkipForward, Timer, TrendingUp } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ArrowLeft, BookOpen, Check, ChevronDown, Droplet, History as HistoryIcon, Info, Minus, Undo2, Users, Pause, Play, Plus, RotateCcw, SkipForward, Timer, TrendingUp } from 'lucide-react';
 import { useNav } from '../App';
 import { useStore } from '../lib/store';
-import { getExercise, getRoutine, modeOf, routineNumber } from '../data/catalog';
+import { alternativesFor, getExercise, getRoutine, modeOf, routineNumber } from '../data/catalog';
 import { lastPerformance, remainingMs, restFor, sessionRatio, settingsFor, suggestWeight, weightStepFor, parseLocal } from '../lib/logic';
 import { fmtClock, fmtElapsed, fmtKg } from '../lib/hooks';
 import { tapFeedback, unlockAudio } from '../lib/device';
@@ -231,6 +232,8 @@ function ExerciseCard({ log, i, total }: { log: ExerciseLog; i: number; total: n
         <p>{ex.cues}</p>
       </div>
 
+      <BusyBlock log={log} i={i} total={total} />
+
       {(mode === 'weights' || mode === 'bodyweight') && <SetsBlock log={log} i={i} />}
       {mode === 'timedSets' && <TimedSets log={log} i={i} />}
       {mode === 'timer' && <SingleTimer log={log} i={i} />}
@@ -256,6 +259,86 @@ function ExerciseCard({ log, i, total }: { log: ExerciseLog; i: number; total: n
         )}
       </div>
     </section>
+  );
+}
+
+// ---------- equipment busy ----------
+function BusyBlock({ log, i, total }: { log: ExerciseLog; i: number; total: number }) {
+  const { state, dispatch } = useStore();
+  const nav = useNav();
+  const origin = log.replaced_from ?? log.exercise_id;
+  const alts = alternativesFor(origin).filter((x) => x.id !== log.exercise_id);
+  const started = log.completed || log.skipped || log.sets.some((s) => s.done) || state.active!.timers[String(i)]?.endsAt != null;
+  const id = `busy-${i}`;
+  const swapTo = (toId: string, fromSheet = true) => {
+    tapFeedback();
+    dispatch({ type: 'swapExercise', ex: i, toId });
+    if (fromSheet) nav.back();
+    nav.toast(`Switched to ${getExercise(toId).name}`);
+  };
+  const canDefer = i < total - 1 && !started;
+  return (
+    <>
+      {log.replaced_from && (
+        <div className="flex items-center justify-between gap-2 rounded-2xl bg-swim/10 px-3 py-1 text-[13px]">
+          <span className="min-w-0 truncate text-swim">Swapped in for {getExercise(log.replaced_from).name}</span>
+          {!started && (
+            <button type="button" onClick={() => swapTo(log.replaced_from!, false)} className="press flex min-h-11 shrink-0 items-center gap-1 px-1 font-semibold text-swim">
+              <Undo2 size={16} aria-hidden /> Switch back
+            </button>
+          )}
+        </div>
+      )}
+      {!started && (alts.length > 0 || canDefer) && (
+        <button
+          type="button"
+          onClick={() => nav.open({ kind: 'sheet', id })}
+          className="press flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-heat/50 bg-heat/10 text-[15px] font-semibold text-heat"
+        >
+          <Users size={18} aria-hidden /> Equipment busy?
+        </button>
+      )}
+      {nav.sheetOpen(id) &&
+        createPortal(
+        <Sheet onClose={nav.back} label="Equipment busy">
+          <h2 className="font-display text-[28px] font-bold">Busy? No problem.</h2>
+          <p className="mt-1 text-[15px] text-muted">Pick a stand-in for {getExercise(origin).name}. It counts the same toward today.</p>
+          <div className="mt-4 flex flex-col gap-2.5">
+            {alts.map((a) => {
+              const ex = getExercise(a.id);
+              const last = lastPerformance(state.sessions, a.id);
+              return (
+                <button key={a.id} type="button" onClick={() => swapTo(a.id)} className="press flex min-h-[72px] flex-col items-start justify-center gap-0.5 rounded-2xl bg-line px-4 py-3 text-left">
+                  <span className="text-[17px] font-semibold">{ex.name}</span>
+                  <span className="text-[13px] text-muted">
+                    {ex.equipment} · {a.why}
+                  </span>
+                  {last?.sets.length ? <span className="text-xs text-dim">You did this before</span> : null}
+                </button>
+              );
+            })}
+            {canDefer && (
+              <button
+                type="button"
+                onClick={() => {
+                  tapFeedback();
+                  dispatch({ type: 'deferExercise', ex: i });
+                  nav.back();
+                  nav.toast('Moved to the end. Maybe it’s free by then.');
+                }}
+                className="press flex min-h-14 items-center gap-2 rounded-2xl border border-line px-4 text-left text-[15px] font-medium"
+              >
+                <SkipForward size={18} aria-hidden /> Do this one last instead
+              </button>
+            )}
+            <Btn variant="secondary" onClick={nav.back}>
+              Cancel
+            </Btn>
+          </div>
+        </Sheet>,
+        document.body,
+      )}
+    </>
   );
 }
 

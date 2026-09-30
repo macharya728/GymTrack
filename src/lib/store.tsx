@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from 'react';
-import { getExercise, modeOf } from '../data/catalog';
+import { alternativesFor, getExercise, modeOf } from '../data/catalog';
 import type { ActiveSession, AppState, Energy, ExerciseSettings, SetLog } from '../types';
 import {
   STORAGE_KEY,
+  buildExerciseLog,
   createSession,
   finishSession,
   loadState,
@@ -23,6 +24,8 @@ export type Action =
   | { type: 'removeSet'; ex: number }
   | { type: 'toggleComplete'; ex: number }
   | { type: 'skip'; ex: number }
+  | { type: 'swapExercise'; ex: number; toId: string }
+  | { type: 'deferExercise'; ex: number }
   | { type: 'timerStart'; key: string; totalMs: number; now: number }
   | { type: 'timerPause'; key: string; now: number }
   | { type: 'timerReset'; key: string }
@@ -78,6 +81,17 @@ function setCompleted(a: ActiveSession, exI: number, completed: boolean, advance
   }
   const next = { ...a, exercises: exs, currentIndex };
   return allFinished(next) ? { ...next, rest: null } : next;
+}
+
+/** Timers are keyed `${exerciseIndex}` or `${exerciseIndex}:${set}`; re-key them when exercises move. */
+function remapTimers(timers: ActiveSession['timers'], map: (i: number) => number | null): ActiveSession['timers'] {
+  const out: ActiveSession['timers'] = {};
+  for (const [k, v] of Object.entries(timers)) {
+    const [i, rest] = k.split(':');
+    const n = map(Number(i));
+    if (n != null) out[rest != null ? `${n}:${rest}` : String(n)] = v;
+  }
+  return out;
 }
 
 export function reducer(state: AppState, action: Action): AppState {
@@ -147,6 +161,35 @@ export function reducer(state: AppState, action: Action): AppState {
         const n = exs[action.ex].skipped ? nextIncomplete(exs, action.ex) : action.ex;
         const next = { ...a, exercises: exs, currentIndex: n >= 0 ? n : a.currentIndex };
         return allFinished(next) ? { ...next, rest: null } : next;
+      });
+    case 'swapExercise':
+      return withActive(state, (a) => {
+        const cur = a.exercises[action.ex];
+        // Only before any work on it is logged, so nothing is ever lost.
+        if (!cur || cur.completed || cur.sets.some((x) => x.done) || a.timers[String(action.ex)]?.endsAt != null) return a;
+        const origin = cur.replaced_from ?? cur.exercise_id;
+        if (action.toId !== origin && !alternativesFor(origin).some((x) => x.id === action.toId)) return a;
+        const next = buildExerciseLog(state, action.toId);
+        if (action.toId !== origin) next.replaced_from = origin;
+        return {
+          ...a,
+          exercises: a.exercises.map((e, i) => (i === action.ex ? next : e)),
+          timers: remapTimers(a.timers, (i) => (i === action.ex ? null : i)),
+          rest: a.rest,
+        };
+      });
+    case 'deferExercise':
+      return withActive(state, (a) => {
+        const n = a.exercises.length;
+        const cur = a.exercises[action.ex];
+        if (!cur || action.ex >= n - 1 || cur.completed) return a;
+        const exs = [...a.exercises.slice(0, action.ex), ...a.exercises.slice(action.ex + 1), cur];
+        return {
+          ...a,
+          exercises: exs,
+          currentIndex: action.ex,
+          timers: remapTimers(a.timers, (i) => (i === action.ex ? n - 1 : i > action.ex ? i - 1 : i)),
+        };
       });
     case 'timerStart':
       return withActive(state, (a) => ({ ...a, timers: { ...a.timers, [action.key]: startCountdown(a.timers[action.key], action.totalMs, action.now) } }));

@@ -1,3 +1,4 @@
+import { EXTRA_TUTORIALS } from './alternatives';
 /**
  * Written how-to content for every exercise in seed.json.
  * `setup` / `steps` headings change by category (see TUTORIAL_HEADINGS).
@@ -19,7 +20,7 @@ export const TUTORIAL_HEADINGS = {
   recovery: ['Before you go in', 'While you’re in'],
 } as const;
 
-export const TUTORIALS: Record<string, Tutorial> = {
+const BASE_TUTORIALS: Record<string, Tutorial> = {
   chest_press: {
     setup: [
       'Raise or lower the seat until the handles line up with the middle of your chest.',
@@ -338,5 +339,7 @@ export const TUTORIALS: Record<string, Tutorial> = {
     search: 'forearm plank proper form',
   },
 };
+
+export const TUTORIALS: Record<string, Tutorial> = { ...BASE_TUTORIALS, ...EXTRA_TUTORIALS };
 
 export const youtubeSearchUrl = (q: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;

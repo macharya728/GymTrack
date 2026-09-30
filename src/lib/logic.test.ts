@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ROUTINES, modeOf, getExercise, EXERCISES } from '../data/catalog';
+import { ROUTINES, modeOf, getExercise, EXERCISES, alternativesFor } from '../data/catalog';
 import { TUTORIALS } from '../data/tutorials';
 import { reducer } from './store';
 import { createSession, initialState, lastPerformance, loadState, sanitize, sessionRatio, suggestWeight, weekDates, isoWeek } from './logic';
@@ -171,5 +171,54 @@ describe('persistence', () => {
     const s = sanitize({ ...initialState(), queueIndex: 99, active: { ...createSession(initialState(), 'workout_a', false, new Date(T0)), routine_id: 'gone' } });
     expect(s.queueIndex).toBe(0);
     expect(s.active).toBeNull();
+  });
+});
+
+describe('equipment busy', () => {
+  const start = (id = 'workout_a') => reducer(initialState(), { type: 'checkIn', routineId: id, express: false, now: T0 });
+
+  it('every alternative exists, has a tutorial, and every equipment lift has one', () => {
+    for (const r of ROUTINES) for (const id of r.exercises) {
+      const e = getExercise(id);
+      if (e.category === 'strength' && e.id !== 'plank') expect(alternativesFor(id).length, id).toBeGreaterThan(0);
+    }
+    for (const id of ['chest_press', 'leg_press', 'sauna_session', 'machine_pec_fly']) {
+      for (const a of alternativesFor(id)) expect(TUTORIALS[a.id], a.id).toBeTruthy();
+    }
+  });
+  it('swaps in an alternative, remembers the original, and switches back', () => {
+    let s = reducer(start(), { type: 'swapExercise', ex: 0, toId: 'db_bench_press' });
+    expect(s.active!.exercises[0].exercise_id).toBe('db_bench_press');
+    expect(s.active!.exercises[0].replaced_from).toBe('chest_press');
+    s = reducer(s, { type: 'swapExercise', ex: 0, toId: 'pushup' });
+    expect(s.active!.exercises[0].replaced_from).toBe('chest_press');
+    s = reducer(s, { type: 'swapExercise', ex: 0, toId: 'chest_press' });
+    expect(s.active!.exercises[0].exercise_id).toBe('chest_press');
+    expect(s.active!.exercises[0].replaced_from).toBeUndefined();
+  });
+  it('refuses unrelated swaps and swaps after sets are logged', () => {
+    let s = start();
+    expect(reducer(s, { type: 'swapExercise', ex: 0, toId: 'plank' }).active).toBe(s.active);
+    s = reducer(s, { type: 'updateSet', ex: 0, set: 0, patch: { weight_kg: 20 } });
+    s = reducer(s, { type: 'logSet', ex: 0, set: 0, now: T0 });
+    expect(reducer(s, { type: 'swapExercise', ex: 0, toId: 'db_bench_press' }).active).toBe(s.active);
+  });
+  it('defers an exercise to the end and re-keys timers', () => {
+    let s = start('workout_d');
+    const n = s.active!.exercises.length;
+    const first = s.active!.exercises[0].exercise_id;
+    s = reducer(s, { type: 'timerStart', key: '3', totalMs: 1000, now: T0 });
+    s = reducer(s, { type: 'deferExercise', ex: 0 });
+    expect(s.active!.exercises[n - 1].exercise_id).toBe(first);
+    expect(s.active!.exercises[0].exercise_id).toBe('hamstring_curl');
+    expect(Object.keys(s.active!.timers)).toEqual(['2']);
+  });
+  it('keeps replaced_from through sanitize', () => {
+    const s = reducer(start(), { type: 'swapExercise', ex: 0, toId: 'pushup' });
+    expect(sanitize(JSON.parse(JSON.stringify(s))).active!.exercises[0].replaced_from).toBe('chest_press');
+  });
+  it('sauna and steam are each other’s alternative', () => {
+    expect(alternativesFor('sauna_session')[0].id).toBe('steam_room_session');
+    expect(alternativesFor('steam_room_session')[0].id).toBe('sauna_session');
   });
 });

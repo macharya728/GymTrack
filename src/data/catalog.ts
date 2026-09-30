@@ -1,7 +1,9 @@
 import seed from './seed.json';
+import { ALTERNATIVES, EXTRA_BODYWEIGHT, EXTRA_DUMBBELL, EXTRA_EXERCISES, type Alternative } from './alternatives';
 import type { Category, Exercise, ExerciseMode, Routine } from '../types';
 
-export const EXERCISES: Exercise[] = seed.exercises as Exercise[];
+/** Seed exercises plus stand-ins that only appear through "Equipment busy". */
+export const EXERCISES: Exercise[] = [...(seed.exercises as Exercise[]), ...EXTRA_EXERCISES];
 export const ROUTINES: Routine[] = seed.routines as Routine[];
 
 const byId = new Map(EXERCISES.map((e) => [e.id, e]));
@@ -18,10 +20,10 @@ export const getRoutine = (id: string): Routine => {
 export const routineNumber = (id: string) => ROUTINES.findIndex((r) => r.id === id) + 1;
 
 /** Exercises that are logged without a weight. */
-const BODYWEIGHT = new Set(['captains_chair_knee_raise', 'plank']);
+const BODYWEIGHT = new Set(['captains_chair_knee_raise', 'plank', ...EXTRA_BODYWEIGHT]);
 
 /** Default weight step per exercise (kg). Dumbbells usually jump in 2 kg. */
-const WEIGHT_STEP: Record<string, number> = { goblet_squat: 2 };
+const WEIGHT_STEP: Record<string, number> = { goblet_squat: 2, ...Object.fromEntries(EXTRA_DUMBBELL.map((id) => [id, 2])) };
 
 /** Default rest per exercise (s). Big compound lifts get longer. */
 const REST: Record<string, number> = { leg_press: 90, goblet_squat: 90 };
@@ -91,3 +93,7 @@ export const CATEGORY_META: Record<Category, { label: string; color: string; tin
   swim: { label: 'Swim', color: 'text-swim', tint: 'bg-swim/15' },
   recovery: { label: 'Heat', color: 'text-heat', tint: 'bg-heat/15' },
 };
+
+/** Stand-ins for when the equipment is busy (empty when there are none). */
+export const alternativesFor = (id: string): (Alternative & { name: string })[] =>
+  (ALTERNATIVES[id] ?? []).map((a) => ({ ...a, name: getExercise(a.id).name }));
