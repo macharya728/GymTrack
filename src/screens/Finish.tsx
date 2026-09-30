@@ -46,13 +46,13 @@ export default function Finish() {
           </p>
         </div>
         <div className="grid w-full grid-cols-3 gap-2.5">
-          <Stat v={String(mins)} l="minutes" />
+          <Stat v={String(mins)} l={mins === 1 ? "minute" : "minutes"} />
           <Stat v={`${done}/${a.exercises.length}`} l="exercises" />
           {vol > 0 ? <Stat v={vol.toLocaleString('en-US')} l="kg lifted" /> : <Stat v={swimMeters(a.exercises)} l="m swum" />}
         </div>
 
         <section className="flex w-full flex-col gap-3 pt-2" aria-label="Energy">
-          <h2 className="text-[17px] font-semibold">How&rsquo;s your energy?</h2>
+          <div><h2 className="text-[17px] font-semibold">How&rsquo;s your energy?</h2><p className="mt-0.5 text-[13px] text-muted">Low turns on Express for next time.</p></div>
           <div className="grid grid-cols-3 gap-2.5" role="radiogroup" aria-label="Energy rating">
             {opts.map(([k, label, Icon, color]) => {
               const on = energy === k;

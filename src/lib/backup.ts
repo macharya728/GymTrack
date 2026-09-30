@@ -20,7 +20,14 @@ export async function exportBackup(state: AppState): Promise<Blob> {
   return new Blob([JSON.stringify(backup)], { type: 'application/json' });
 }
 
-export async function importBackup(file: Blob): Promise<AppState> {
+export interface ParsedBackup {
+  state: AppState;
+  photos: Record<string, string>;
+  exportedAt?: string;
+}
+
+/** Parse and validate only. Nothing is written until the person confirms (see applyBackupPhotos). */
+export async function importBackup(file: Blob): Promise<ParsedBackup> {
   const text = await file.text();
   let parsed: unknown;
   try {
@@ -30,14 +37,17 @@ export async function importBackup(file: Blob): Promise<AppState> {
   }
   const b = parsed as Partial<Backup>;
   if (b?.app !== 'gymtrack' || !isAppState(b.state)) throw new Error('That file isn’t a GymTrack backup.');
-  for (const [id, url] of Object.entries(b.photos ?? {})) {
+  return { state: b.state, photos: b.photos ?? {}, exportedAt: typeof b.exportedAt === 'string' ? b.exportedAt : undefined };
+}
+
+export async function applyBackupPhotos(photos: Record<string, string>) {
+  for (const [id, url] of Object.entries(photos)) {
     try {
       await putPhoto(id, await dataUrlToBlob(url));
     } catch {
       /* skip broken photo */
     }
   }
-  return b.state;
 }
 
 export function downloadBlob(blob: Blob, name: string) {

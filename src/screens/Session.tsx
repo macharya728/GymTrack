@@ -432,6 +432,7 @@ function useCountdown(key: string, totalMs: number) {
   const t = state.active!.timers[key];
   const rem = t ? remainingMs(t, nav.now) : totalMs;
   const running = !!t && t.endsAt != null;
+  const startedAt = useRef(0);
   return {
     rem,
     running,
@@ -440,9 +441,14 @@ function useCountdown(key: string, totalMs: number) {
     start: () => {
       unlockAudio();
       tapFeedback();
+      startedAt.current = Date.now();
       dispatch({ type: 'timerStart', key, totalMs, now: Date.now() });
     },
-    pause: () => dispatch({ type: 'timerPause', key, now: Date.now() }),
+    // A second tap right after Start (sweaty double-tap) must not pause the timer.
+    pause: () => {
+      if (Date.now() - startedAt.current < 1200) return;
+      dispatch({ type: 'timerPause', key, now: Date.now() });
+    },
     reset: () => dispatch({ type: 'timerReset', key }),
   };
 }
@@ -453,6 +459,30 @@ function TimerFace({ rem, progress, color, size = 132, children }: { rem: number
       <span className="font-display text-[40px] font-bold leading-none tabular">{fmtClock(rem)}</span>
       {children}
     </Ring>
+  );
+}
+
+function ResetBtn({ started, onReset }: { started: boolean; onReset: () => void }) {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const id = window.setTimeout(() => setArmed(false), 3000);
+    return () => window.clearTimeout(id);
+  }, [armed]);
+  return (
+    <button
+      type="button"
+      aria-label={armed ? 'Tap again to reset the timer' : 'Reset timer'}
+      disabled={!started}
+      onClick={() => {
+        if (!armed) return setArmed(true);
+        setArmed(false);
+        onReset();
+      }}
+      className={'press flex h-14 items-center justify-center gap-1.5 rounded-2xl px-4 text-sm font-semibold disabled:opacity-40 ' + (armed ? 'bg-warn/15 text-warn' : 'bg-line text-ink')}
+    >
+      <RotateCcw size={20} aria-hidden /> {armed ? 'Tap again' : 'Reset'}
+    </button>
   );
 }
 
@@ -499,9 +529,7 @@ function SingleTimer({ log, i }: { log: ExerciseLog; i: number }) {
             <Play size={20} fill="currentColor" aria-hidden /> {c.started ? 'Resume' : `Start ${fmtClock(total)}`}
           </Btn>
         )}
-        <IconBtn label="Reset timer" className="h-14 w-14 rounded-2xl bg-line" onClick={c.reset}>
-          <RotateCcw size={20} aria-hidden />
-        </IconBtn>
+        <ResetBtn started={c.started} onReset={c.reset} />
       </div>
       <button type="button" onClick={() => { tapFeedback(); dispatch({ type: 'toggleComplete', ex: i }); }} className="press -mt-1 min-h-12 px-3 text-sm font-semibold text-muted underline underline-offset-4">
         Mark done without timer

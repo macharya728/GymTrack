@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Check, ChevronRight, Flame, Play, Timer, WifiOff, Zap, Activity, Dumbbell, Waves } from 'lucide-react';
 import { useNav } from '../App';
 import { useStore } from '../lib/store';
@@ -17,10 +16,9 @@ export default function Home() {
   const queued = ROUTINES[state.queueIndex];
   const routine = nav.pick ? getRoutine(nav.pick) : queued;
   const swapped = routine.id !== queued.id;
-  const [express, setExpress] = useState(state.preferExpressNext);
-  useEffect(() => setExpress(state.preferExpressNext), [state.preferExpressNext]);
+  const lowEnergy = state.preferExpressNext;
 
-  const checkIn = () => {
+  const checkIn = (express: boolean) => {
     unlockAudio();
     tapFeedback();
     void requestPersistentStorage();
@@ -66,33 +64,24 @@ export default function Home() {
             </div>
             <h2 className="font-display text-[30px] font-bold leading-[1.05]">{routine.title}</h2>
             <p className="text-sm leading-5 text-muted">{routine.subtitle}</p>
-            <MetaChips routine={routine} express={express} />
-            <button
-              type="button"
-              role="switch"
-              aria-checked={express}
-              onClick={() => {
-                tapFeedback();
-                setExpress((v) => !v);
-              }}
-              className="press flex items-center gap-3 rounded-2xl bg-bg/55 py-2.5 pl-2.5 pr-3 text-left"
-            >
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-lime/15 text-lime">
-                <Zap size={20} aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-semibold">15-min Express</span>
-                <span className="block truncate text-[13px] text-muted">{routine.express_exercise_ids.map(shortName).join(' · ')}</span>
-                {state.preferExpressNext && <span className="block text-xs text-heat">On because you logged low energy last time</span>}
-              </span>
-              <span className={cx('relative h-8 w-[52px] shrink-0 rounded-full border-2 transition-colors', express ? 'border-lime bg-lime' : 'border-dim')}>
-                <span className={cx('absolute top-1/2 -translate-y-1/2 rounded-full transition-all', express ? 'left-[22px] h-6 w-6 bg-onlime' : 'left-1.5 h-4 w-4 bg-dim')} />
-              </span>
-            </button>
-            <Btn variant="primary" size="lg" onClick={checkIn}>
-              <Play size={22} fill="currentColor" aria-hidden />
-              Check In &amp; Start
-            </Btn>
+            <MetaChips routine={routine} />
+            {lowEnergy && <p className="text-[13px] text-heat">You logged low energy last time, so Express is first. Full workout is one tap below.</p>}
+            {(() => {
+              const full = (
+                <Btn key="full" variant={lowEnergy ? 'secondary' : 'primary'} size="lg" onClick={() => checkIn(false)}>
+                  <Play size={22} fill="currentColor" aria-hidden />
+                  Start workout · ~{estimateMinutes(routine.exercises)} min
+                </Btn>
+              );
+              const fast = (
+                <Btn key="fast" variant={lowEnergy ? 'primary' : 'secondary'} size="lg" onClick={() => checkIn(true)}>
+                  <Zap size={22} aria-hidden />
+                  Express · ~{estimateMinutes(routine.express_exercise_ids)} min
+                </Btn>
+              );
+              return lowEnergy ? [fast, full] : [full, fast];
+            })()}
+            <p className="-mt-1 truncate text-center text-xs text-dim">Express: {routine.express_exercise_ids.map(shortName).join(' · ')}</p>
           </section>
         )}
 
@@ -101,7 +90,7 @@ export default function Home() {
         {last && (
           <p className="px-1 pb-2 text-[13px] text-dim">
             Last: {parseLocal(last.date).toLocaleDateString('en-US', { weekday: 'short' })} · Workout {routineNumber(last.routine_id)} ·{' '}
-            {Math.round((Date.parse(last.finished_at) - Date.parse(last.checked_in_at)) / 60000)} min
+            {Math.max(1, Math.round((Date.parse(last.finished_at) - Date.parse(last.checked_in_at)) / 60000))} min
             {last.energy_rating ? ` · ${last.energy_rating} energy` : ''}
           </p>
         )}
@@ -128,8 +117,8 @@ function OfflineChip() {
   return null;
 }
 
-function MetaChips({ routine, express }: { routine: Routine; express: boolean }) {
-  const ids = express ? routine.express_exercise_ids : routine.exercises;
+function MetaChips({ routine }: { routine: Routine }) {
+  const ids = routine.exercises;
   const exs = ids.map(getExercise);
   const n = (c: string) => exs.filter((e) => e.category === c).length;
   const swimM = exs.reduce((a, e) => a + (e.target_distance_m ?? 0), 0);

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Relative base so the same build works on GitHub Pages (/gymtrack/), Netlify (/) or any sub-path.
+// Relative base so the same build works on GitHub Pages (/GymTrack/), Netlify (/) or any sub-path.
 export default defineConfig({
   base: './',
   plugins: [

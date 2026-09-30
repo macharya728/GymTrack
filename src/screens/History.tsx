@@ -5,10 +5,10 @@ import { useStore } from '../lib/store';
 import { getExercise, getRoutine, modeOf, routineNumber } from '../data/catalog';
 import { localDate, parseLocal, sanitize, volumeKg } from '../lib/logic';
 import { fmtKg } from '../lib/hooks';
-import { downloadBlob, exportBackup, importBackup } from '../lib/backup';
+import { applyBackupPhotos, downloadBlob, exportBackup, importBackup, type ParsedBackup } from '../lib/backup';
 import { requestPersistentStorage } from '../lib/device';
 import { Btn, Chip, HEX, Ring, SectionLabel, Sheet, cx } from '../components/ui';
-import type { SessionLog } from '../types';
+import type { AppState, SessionLog } from '../types';
 
 export default function History() {
   const { state } = useStore();
@@ -154,21 +154,47 @@ function Backup() {
       setBusy(false);
     }
   };
+  const [pending, setPending] = useState<{ clean: AppState; dropped: number; parsed: ParsedBackup } | null>(null);
+
   const doImport = async (f: File | undefined) => {
     if (!f) return;
     setErr(null);
     setBusy(true);
     try {
-      const raw = await importBackup(f);
-      const clean = sanitize(raw);
-      const dropped = raw.sessions.length - clean.sessions.length;
-      dispatch({ type: 'replaceState', state: clean });
-      nav.toast(`Restored ${clean.sessions.length} session${clean.sessions.length === 1 ? '' : 's'}${dropped > 0 ? `. Skipped ${dropped} from workouts that no longer exist.` : ''}`);
+      const parsed = await importBackup(f);
+      const clean = sanitize(parsed.state);
+      const dropped = parsed.state.sessions.length - clean.sessions.length;
+      if (clean.sessions.length === 0 && state.sessions.length > 0) {
+        setErr(
+          dropped > 0
+            ? 'This backup has no sessions this version can read, so nothing was changed. Your current data is untouched.'
+            : 'This backup has no sessions, so nothing was changed. Your current data is untouched.',
+        );
+        return;
+      }
+      setPending({ clean, dropped, parsed });
+      nav.open({ kind: 'sheet', id: 'restore-confirm' });
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Import failed.');
     } finally {
       setBusy(false);
       if (file.current) file.current.value = '';
+    }
+  };
+  const confirmRestore = async () => {
+    if (!pending) return;
+    setBusy(true);
+    try {
+      // Safety copy of what is on the phone right now, so a wrong file is never a loss.
+      if (state.sessions.length > 0) downloadBlob(await exportBackup(state), `gymtrack-before-restore-${localDate()}.json`);
+      await applyBackupPhotos(pending.parsed.photos);
+      dispatch({ type: 'replaceState', state: pending.clean });
+      const n = pending.clean.sessions.length;
+      nav.back();
+      nav.toast(`Restored ${n} session${n === 1 ? '' : 's'}${pending.dropped > 0 ? `. Skipped ${pending.dropped} from workouts that no longer exist.` : ''}`);
+      setPending(null);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -195,6 +221,25 @@ function Backup() {
         </p>
       )}
       <PersistStatus />
+      {nav.sheetOpen('restore-confirm') && pending && (
+        <Sheet onClose={nav.back} label="Restore backup?">
+          <h2 className="font-display text-[28px] font-bold">Replace your data?</h2>
+          <p className="mt-2 text-[15px] text-muted">
+            This backup has {pending.clean.sessions.length} session{pending.clean.sessions.length === 1 ? '' : 's'}
+            {pending.parsed.exportedAt ? ` (saved ${new Date(pending.parsed.exportedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` : ''}. You have {state.sessions.length} now, and they will be replaced.
+            {pending.dropped > 0 && ` ${pending.dropped} from workouts that no longer exist will be skipped.`}
+          </p>
+          {state.sessions.length > 0 && <p className="mt-2 text-[13px] text-muted">A copy of your current data downloads first, just in case.</p>}
+          <div className="mt-5 flex flex-col gap-2.5">
+            <Btn variant="danger" onClick={() => void confirmRestore()} disabled={busy}>
+              <Upload size={18} aria-hidden /> Replace with backup
+            </Btn>
+            <Btn variant="secondary" onClick={nav.back}>
+              Cancel
+            </Btn>
+          </div>
+        </Sheet>
+      )}
     </section>
   );
 }
